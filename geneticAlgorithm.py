@@ -59,4 +59,28 @@ def selecao(pop, taxa_elitismo = 0.1):
     #como a populacao foi ordenada por fitness em calcular_fitness, entao, retornamos os num_selecinados primeiros individuos
     return pop[0:num_selecionados]
 
+# troca duas posicoes do individuo
+def troca(ind_i,n1,n2):
+	aux = ind_i[n1]
+	ind_i[n1] = ind_i[n2]
+	ind_i[n2] = aux
+	return ind_i
+
+def mutacao(pop,num_mutacao,fobj,matriz_dist):
+	inicio = len(pop) - num_mutacao # vai sofrer mutacao apenas os individuos que foram criados pelo crossover
+	dim = len(pop[0])-2
+	
+	for i in range(inicio,len(pop)):
+		for j in range(2): # duas mutacoes serao feitas nos individuos, isso é apenas um valor podendo depois ser alterado
+			n1 = randint(1,dim)
+			n2 = randint(1,dim)
+			ind_i = np.copy(pop[i])
+			ind_i = troca(ind_i,n1,n2)
+			copied = np.copy(ind_i[0:dim+1].astype(np.int64)) # foi necessario a conversao pois quando insere algum
+            #individuo na populacao o numpy converte os valores para float64
+			ind_i[dim+1] = fobj(copied,matriz_dist)
+            
+			if ind_i[dim] < pop[i][dim]:
+				pop[i] = np.copy(ind_i)
+	return pop
 
