@@ -84,3 +84,70 @@ def mutacao(pop,num_mutacao,fobj,matriz_dist):
 		pop[i] = np.copy(ind_i)
     return pop
 
+def selec_Aleator_Dois_Pontos_De_Corte_Do(Pai1):
+    lim = len(Pai1) - 2
+
+    while True:
+	limite_inferior = randint(1,lim)
+	limite_superior = randint(1,lim)
+
+	if limite_inferior < limite_superior:
+	   return (limite_inferior,limite_superior)
+		
+
+def elemento_repetido(individuo,limite_inferior,limite_superior):
+    tam = len(individuo) - 1
+
+    for i in range(1,tam):
+	for j in range(i+1,tam):
+	    if individuo[i] == individuo[j]:
+		if j >= limite_inferior and j <= limite_superior:
+		   return i
+		else:
+		   return j
+
+     return -1
+
+def acabar_repeticao(filho,pai,limite_inferior,limite_superior):
+
+    while True:
+	indice_repeticao = elemento_repetido(filho,limite_inferior,limite_superior)
+
+	if indice_repeticao == -1:
+	   break
+	else:
+	    filho[indice_repeticao] = np.copy(pai[indice_repeticao])
+
+     return filho
+
+def PMX(pai_1,pai_2): #PMX e o nome do algoritmo de crossover que usei
+    filho1 = np.copy(pai_1)
+    filho2 = np.copy(pai_2)
+
+    limite_inferior,limite_superior = selec_Aleator_Dois_Pontos_De_Corte_Do(pai_1)
+
+    filho1[limite_inferior:(limite_superior+1)] = np.copy(pai_2[limite_inferior:(limite_superior+1)])
+    filho2[limite_inferior:(limite_superior+1)] = np.copy(pai_1[limite_inferior:(limite_superior+1)])
+
+    filho1 = acabar_repeticao(filho1,pai_2,limite_inferior,limite_superior)
+
+    filho2 = acabar_repeticao(filho2,pai_1,limite_inferior,limite_superior)
+
+    return (filho1,filho2)
+
+
+
+def crossover(pop,taxa_crossover,tam_pop):
+    tamanho_inicial = len(pop)
+
+    while len(pop) < tam_pop:
+	  prob = random()
+	  n1 = randint(0,tamanho_inicial)
+	  n2 = randint(0,tamanho_inicial)
+
+	  if prob <= taxa_crossover:
+	     f1,f2 = PMX(pop[n1],pop[n2])
+	     pop = np.append(pop,[f1],axis=0)
+	     pop = np.append(pop,[f2],axis=0)
+     return pop
+
