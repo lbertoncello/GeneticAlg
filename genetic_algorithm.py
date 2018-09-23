@@ -36,7 +36,7 @@ class Individuo():
         self.distancia_percorrida = soma_distancias
         #Inverto o sinal para atribuir como nota, já que quanto maior a distancia,
         #menor a nota
-        self.nota_avaliacao = -soma_distancias
+        self.nota_avaliacao = 1 / soma_distancias
         
     #Função que faz o cruzamento entre 2 indivíduos. O método de cruzamento 
     #é aquele em que você divide o cromossomo de ambos os pais em alguma parte
