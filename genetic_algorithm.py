@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as numpy
 
 from cidade import *
-from Utils import *
+from Utils import matrix as matrix
+from Utils import utils as utils
 
 #Classe apenas para armazenar os dados que serão usados
 class Produto():
@@ -57,7 +58,7 @@ class Individuo():
         #Adiciona o elemento à parte 2, caso ele não esteja presente na parte 1.
         #Isto é para impedir que haja repetição de vértices.
         for e in outro_individuo.cromossomo:
-            if char_search(e, parte1) == False:
+            if utils.char_search(e, parte1) == False:
                 parte2.append(e)
         
         filho1 = parte1 + parte2
@@ -66,7 +67,7 @@ class Individuo():
         parte2 = []
         
         for e in self.cromossomo:
-            if char_search(e, parte1) == False:
+            if utils.char_search(e, parte1) == False:
                 parte2.append(e)
         
         filho2 = parte1 + parte2
@@ -218,14 +219,14 @@ if __name__ == '__main__':
     lista_cidades.append(Cidade("11", 11.0, 11.0))
     lista_cidades.append(Cidade("12", 12.0, 12.0))
     
-    distancias = calc_distances(lista_cidades)
+    distancias = matrix.calc_distances(lista_cidades)
     
     tamanho_populacao = 20
     taxa_mutacao = 0.01
     numero_geracoes = 100
     vertice_inicial = (7.0, 7.0)
     
-    indice_vertice_inicial = search_vertex_index(vertice_inicial, lista_cidades)
+    indice_vertice_inicial = utils.search_vertex_index(vertice_inicial, lista_cidades)
     
     if indice_vertice_inicial != -1:
         ag = AlgoritmoGenetico(tamanho_populacao)
