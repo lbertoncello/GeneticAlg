@@ -16,15 +16,24 @@ class Produto():
 #Neste problema nós procuramos os produtos a serem levados em um caminhão de
 #espaço limitado de forma a maximizar o lucro.
 class Individuo():
-    def __init__(self, distancias, geracao = 0):
+    def __init__(self, distancias, indice_vertice_inicial, geracao = 0):
         self.distancias = distancias
         self.geracao = geracao
         self.distancia_percorrida = 0
         self.nota_avaliacao = 0
+        self.indice_vertice_inicial = indice_vertice_inicial
         
         self.cromossomo = list(range(len(self.distancias)))
         rnd.shuffle(self.cromossomo)
-
+        
+        #Colocar o vértice inicial na posição 0
+        for i in range(len(self.cromossomo)):
+            if self.cromossomo[i] == self.indice_vertice_inicial:
+                temp = self.cromossomo[0]
+                self.cromossomo[0] = self.indice_vertice_inicial
+                self.cromossomo[i] = temp
+                
+                break
                 
     #Função que vai atribuir uma nota pra solução gerada.
     def avaliacao(self):
@@ -34,22 +43,36 @@ class Individuo():
             soma_distancias += self.distancias[self.cromossomo[i]][self.cromossomo[i+1]]
             
         self.distancia_percorrida = soma_distancias
-        #Inverto o sinal para atribuir como nota, já que quanto maior a distancia,
+        #Divido 1 pela distância pra ser a nota, já que quanto maior a distancia,
         #menor a nota
         self.nota_avaliacao = 1 / soma_distancias
         
-    #Função que faz o cruzamento entre 2 indivíduos. O método de cruzamento 
-    #é aquele em que você divide o cromossomo de ambos os pais em alguma parte
-    #aleatória, e aí cada filho vai receber o lado esquerdo de um pai e o lado
-    #direito do outro.
+    #Algoritmo usado: Ordered Crossover
     def crossover(self, outro_individuo):
         corte = round(rnd.random() * len(self.cromossomo))
         
-        filho1 = outro_individuo.cromossomo[0:corte] + self.cromossomo[corte::]
-        filho2 = self.cromossomo[0:corte] + outro_individuo.cromossomo[corte::]
+        parte1 = self.cromossomo[0:corte]
+        parte2 = []
         
-        filhos = [Individuo(self.distancias, self.geracao + 1),
-                  Individuo(self.distancias, self.geracao + 1)]
+        #Adiciona o elemento à parte 2, caso ele não esteja presente na parte 1.
+        #Isto é para impedir que haja repetição de vértices.
+        for e in outro_individuo.cromossomo:
+            if char_search(e, parte1) == False:
+                parte2.append(e)
+        
+        filho1 = parte1 + parte2
+        
+        parte1 = outro_individuo.cromossomo[0:corte]
+        parte2 = []
+        
+        for e in self.cromossomo:
+            if char_search(e, parte1) == False:
+                parte2.append(e)
+        
+        filho2 = parte1 + parte2
+        
+        filhos = [Individuo(self.distancias, self.indice_vertice_inicial, self.geracao + 1),
+                  Individuo(self.distancias, self.indice_vertice_inicial, self.geracao + 1)]
         
         filhos[0].cromossomo = filho1
         filhos[1].cromossomo = filho2
@@ -60,9 +83,14 @@ class Individuo():
     #gerado aleatóriamente for maior que a taxa de mutação.
     #Se ocorrer mutação, troca a posição de 2 genes
     def mutacao(self, taxa_mutacao):      
-        for i in range(len(self.cromossomo)):
+        #Não pode haver mutação no vértice inicial
+        for i in range(1, len(self.cromossomo)):
             if rnd.random() < taxa_mutacao:
                 posicao = round(rnd.random() * (len(self.cromossomo) - 1))
+                
+                #Para não permitir que o vertice inicial seja permutado
+                while posicao == 0:
+                    posicao = round(rnd.random() * (len(self.cromossomo) - 1))
                 
                 temp = self.cromossomo[posicao]
                 self.cromossomo[posicao] = self.cromossomo[i]
@@ -82,9 +110,9 @@ class AlgoritmoGenetico():
         self.lista_solucoes = []
         
     #Temos que adaptar os parâmetros recebidos para os usados em nosso problema.
-    def inicializa_populacao(self, distancias):
+    def inicializa_populacao(self, distancias, indice_vertice_inicial):
         for i in range(self.tamanho_populacao):
-            self.populacao.append(Individuo(distancias))
+            self.populacao.append(Individuo(distancias, indice_vertice_inicial))
             
         self.melhor_solucao = self.populacao[0]
         
@@ -128,8 +156,8 @@ class AlgoritmoGenetico():
                                                                melhor.distancia_percorrida))
         
     #Gerencia o funcionamento do algoritmo genético.
-    def resolver(self, taxa_mutacao, numero_geracoes, distancias):
-        self.inicializa_populacao(distancias)
+    def resolver(self, taxa_mutacao, numero_geracoes, distancias, indice_vertice_inicial):
+        self.inicializa_populacao(distancias, indice_vertice_inicial)
         
         for individuo in self.populacao:
             individuo.avaliacao()
@@ -137,7 +165,7 @@ class AlgoritmoGenetico():
         self.ordena_populacao()
         
         self.melhor_solucao = self.populacao[0]
-        self.lista_solucoes.append(self.melhor_solucao.nota_avaliacao)
+        self.lista_solucoes.append(self.melhor_solucao.distancia_percorrida)
         
         self.visualiza_geracao()
         
@@ -163,7 +191,7 @@ class AlgoritmoGenetico():
             self.visualiza_geracao()
             
             melhor = self.populacao[0]
-            self.lista_solucoes.append(melhor.nota_avaliacao)
+            self.lista_solucoes.append(melhor.distancia_percorrida)
             self.melhor_individuo(melhor)
             
         print("\nMelhor solução -> G:%s -> Distancia: %s" % (self.melhor_solucao.geracao,
@@ -192,13 +220,25 @@ if __name__ == '__main__':
     
     distancias = calc_distances(lista_cidades)
     
-    tamanho_populacao = 50
+    tamanho_populacao = 20
     taxa_mutacao = 0.01
-    numero_geracoes = 1000
+    numero_geracoes = 100
+    vertice_inicial = (7.0, 7.0)
     
-    ag = AlgoritmoGenetico(tamanho_populacao)
+    indice_vertice_inicial = search_vertex_index(vertice_inicial, lista_cidades)
     
-    resultado = ag.resolver(taxa_mutacao, numero_geracoes, distancias)
+    if indice_vertice_inicial != -1:
+        ag = AlgoritmoGenetico(tamanho_populacao)
+    
+        resultado = ag.resolver(taxa_mutacao, numero_geracoes, distancias, indice_vertice_inicial)
+        
+        plt.plot(ag.lista_solucoes)
+        plt.title("Acompanhamento dos valores")
+        plt.show()
+    else:
+        print("Vertice inexistente!")
+    
+
     
     '''
     lista_produtos = []
