@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as numpy
 
 from cidade import *
+from leitura import *
 from Utils import matrix as matrix
 from Utils import utils as utils
 
@@ -206,25 +207,27 @@ class AlgoritmoGenetico():
 #o algoritmo genético, printa o resultado e printa o gráfico.
 if __name__ == '__main__':
     lista_cidades = []
-    lista_cidades.append(Cidade("1", 1.0, 1.0))
-    lista_cidades.append(Cidade("2", 2.0, 2.0))
-    lista_cidades.append(Cidade("3", 3.0, 3.0))
-    lista_cidades.append(Cidade("4", 4.0, 4.0))
-    lista_cidades.append(Cidade("5", 5.0, 5.0))
-    lista_cidades.append(Cidade("6", 6.0, 6.0))
-    lista_cidades.append(Cidade("7", 7.0, 7.0))
-    lista_cidades.append(Cidade("8", 8.0, 8.0))
-    lista_cidades.append(Cidade("9", 9.0, 9.0))
-    lista_cidades.append(Cidade("10", 10.0, 10.0))
-    lista_cidades.append(Cidade("11", 11.0, 11.0))
-    lista_cidades.append(Cidade("12", 12.0, 12.0))
-    
+    # lista_cidades.append(Cidade("1", 1.0, 1.0))
+    # lista_cidades.append(Cidade("2", 2.0, 2.0))
+    # lista_cidades.append(Cidade("3", 3.0, 3.0))
+    # lista_cidades.append(Cidade("4", 4.0, 4.0))
+    # lista_cidades.append(Cidade("5", 5.0, 5.0))
+    # lista_cidades.append(Cidade("6", 6.0, 6.0))
+    # lista_cidades.append(Cidade("7", 7.0, 7.0))
+    # lista_cidades.append(Cidade("8", 8.0, 8.0))
+    # lista_cidades.append(Cidade("9", 9.0, 9.0))
+    # lista_cidades.append(Cidade("10", 10.0, 10.0))
+    # lista_cidades.append(Cidade("11", 11.0, 11.0))
+    # lista_cidades.append(Cidade("12", 12.0, 12.0))
+    lista_cidades = getListaCidades(lerEntrada("./Dados/att532.tsp"))
+    print(lista_cidades[0].id)
+
     distancias = matrix.calc_distances(lista_cidades)
     
     tamanho_populacao = 20
     taxa_mutacao = 0.01
     numero_geracoes = 100
-    vertice_inicial = (7.0, 7.0)
+    vertice_inicial = (lista_cidades[0].x, lista_cidades[0].y)
     
     indice_vertice_inicial = utils.search_vertex_index(vertice_inicial, lista_cidades)
     
