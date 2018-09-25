@@ -1,6 +1,7 @@
 import random as rnd
 import matplotlib.pyplot as plt
 import numpy as numpy
+import sys as sys
 
 from cidade import *
 from leitura import *
@@ -154,7 +155,7 @@ class AlgoritmoGenetico():
     #Função apenas pra printar os resultados de cada geração.
     def visualiza_geracao(self):
         melhor = self.populacao[0]
-        print("G:%s -> Distancia: %s" % (self.populacao[0].geracao,
+        print("G:%s -> Distancia: %s" % (self.geracao,
                                                                melhor.distancia_percorrida))
         
     #Gerencia o funcionamento do algoritmo genético.
@@ -170,6 +171,8 @@ class AlgoritmoGenetico():
         self.lista_solucoes.append(self.melhor_solucao.distancia_percorrida)
         
         self.visualiza_geracao()
+
+        self.geracao += 1
         
         for geracao in range(numero_geracoes):
             soma_avaliacao = self.soma_avaliacoes()
@@ -183,14 +186,21 @@ class AlgoritmoGenetico():
                 
                 nova_populacao.append(filhos[0].mutacao(taxa_mutacao))
                 nova_populacao.append(filhos[1].mutacao(taxa_mutacao))
+
+            individuos_mantidos = self.populacao[:round(self.tamanho_populacao * 0.2)]
                 
-            self.populacao = list(nova_populacao)
+            self.populacao = list(nova_populacao) + individuos_mantidos
             
             for individuo in self.populacao:
                 individuo.avaliacao()
-            
+    
             self.ordena_populacao()
+
+            self.populacao = self.populacao[:round(self.tamanho_populacao * 0.8)]
+
             self.visualiza_geracao()
+
+            self.geracao += 1
             
             melhor = self.populacao[0]
             self.lista_solucoes.append(melhor.distancia_percorrida)
@@ -206,28 +216,25 @@ class AlgoritmoGenetico():
 #Apenas cria a lista de produtos que serão usados, chama a função que executa
 #o algoritmo genético, printa o resultado e printa o gráfico.
 if __name__ == '__main__':
+    #agrv[1]: caminho dados
+    #argv[2]: ponto x V_inicial
+    #argv[3]: ponto y V_inicial
+    #argv[4]: tamanho pop
+    #argv[5]: tx mutacao
+    #argv[6]: num geracoes
+    
     lista_cidades = []
-    # lista_cidades.append(Cidade("1", 1.0, 1.0))
-    # lista_cidades.append(Cidade("2", 2.0, 2.0))
-    # lista_cidades.append(Cidade("3", 3.0, 3.0))
-    # lista_cidades.append(Cidade("4", 4.0, 4.0))
-    # lista_cidades.append(Cidade("5", 5.0, 5.0))
-    # lista_cidades.append(Cidade("6", 6.0, 6.0))
-    # lista_cidades.append(Cidade("7", 7.0, 7.0))
-    # lista_cidades.append(Cidade("8", 8.0, 8.0))
-    # lista_cidades.append(Cidade("9", 9.0, 9.0))
-    # lista_cidades.append(Cidade("10", 10.0, 10.0))
-    # lista_cidades.append(Cidade("11", 11.0, 11.0))
-    # lista_cidades.append(Cidade("12", 12.0, 12.0))
-    lista_cidades = getListaCidades(lerEntrada("./Dados/att532.tsp"))
-    print(lista_cidades[0].id)
+    lista_cidades = getListaCidades(lerEntrada(sys.argv[1]))
 
     distancias = matrix.calc_distances(lista_cidades)
     
-    tamanho_populacao = 20
-    taxa_mutacao = 0.01
-    numero_geracoes = 100
-    vertice_inicial = (lista_cidades[0].x, lista_cidades[0].y)
+    tamanho_populacao = int(sys.argv[4])
+    taxa_mutacao = float(sys.argv[5])
+    numero_geracoes = int(sys.argv[6])
+    vertice_inicial = (float(sys.argv[2]), float(sys.argv[3]))
+
+    print("x: %s  y: %s" % (sys.argv[2], sys.argv[3]))
+    print(lista_cidades[0].x, lista_cidades[0].y)
     
     indice_vertice_inicial = utils.search_vertex_index(vertice_inicial, lista_cidades)
     
@@ -242,50 +249,4 @@ if __name__ == '__main__':
     else:
         print("Vertice inexistente!")
     
-
-    
-    '''
-    lista_produtos = []
-    lista_produtos.append(Produto("Geladeira Dako", 0.751, 999.90))
-    lista_produtos.append(Produto("Iphone 6", 0.0000899, 2911.12))
-    lista_produtos.append(Produto("TV 55' ", 0.400, 4346.99))
-    lista_produtos.append(Produto("TV 50' ", 0.290, 3999.90))
-    lista_produtos.append(Produto("TV 42' ", 0.200, 2999.00))
-    lista_produtos.append(Produto("Notebook Dell", 0.00350, 2499.90))
-    lista_produtos.append(Produto("Ventilador Panasonic", 0.496, 199.90))
-    lista_produtos.append(Produto("Microondas Electrolux", 0.0424, 308.66))
-    lista_produtos.append(Produto("Microondas LG", 0.0544, 429.90))
-    lista_produtos.append(Produto("Microondas Panasonic", 0.0319, 299.29))
-    lista_produtos.append(Produto("Geladeira Brastemp", 0.635, 849.00))
-    lista_produtos.append(Produto("Geladeira Consul", 0.870, 1199.89))
-    lista_produtos.append(Produto("Notebook Lenovo", 0.498, 1999.90))
-    lista_produtos.append(Produto("Notebook Asus", 0.527, 3999.00))
-    
-    nomes = []
-    espacos = []
-    valores = []
-    
-    for produto in lista_produtos:
-        nomes.append(produto.nome)
-        espacos.append(produto.espaco)
-        valores.append(produto.valor)
-        
-    limite_espaco = 3
-    tamanho_populacao = 20
-    taxa_mutacao = 0.01
-    numero_geracoes = 100
-    
-    ag = AlgoritmoGenetico(tamanho_populacao)
-    
-    resultado = ag.resolver(taxa_mutacao, numero_geracoes, espacos, valores, limite_espaco)
-    
-    for i in range(len(lista_produtos)):
-        if resultado[i] == '1':
-            print("Nome: %s R$ %s" % (lista_produtos[i].nome,
-                                      lista_produtos[i].valor))
-    
-    plt.plot(ag.lista_solucoes)
-    plt.title("Acompanhamento dos valores")
-    plt.show()
-    '''
 
