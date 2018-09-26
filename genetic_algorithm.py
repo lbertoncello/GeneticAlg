@@ -210,7 +210,7 @@ class AlgoritmoGenetico():
                                                                self.melhor_solucao.distancia_percorrida))
         print("Cromossomo: %s" % self.melhor_solucao.cromossomo)
         
-        return self.melhor_solucao.cromossomo
+        return (self.melhor_solucao.cromossomo,self.melhor_solucao.distancia_percorrida)
             
     
 #Apenas cria a lista de produtos que serão usados, chama a função que executa
