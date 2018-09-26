@@ -18,7 +18,7 @@ def sensibilidade(lista_params,lista_cidades,v_inicial):
                 ag = AlgoritmoGenetico(ind)
                 _,solucao = ag.resolver(tx, ger, distancias, indice_vertice_inicial)
 
-                resultados += str([solucao, ind, ger, tx]) + "\n"
+                resultados += "Solucao: " + str(solucao) + " Ind: " + str(ind) + " Ger: " + str(ger) + " tx: " + str(tx) + "\n"
 
                 if solucao < melhor_fitness:
                     melhor_fitness = solucao
@@ -35,7 +35,7 @@ def sensibilidade(lista_params,lista_cidades,v_inicial):
 
 
 arq = "burma14.tsp"
-l_params = ([50,150,200],[100,200,300],[0.2,0.5,0.7])
+l_params = ([50,250,1000],[20,150,400],[0.01,0.05,0.20])
 lista_cidades = []
 lista_cidades = getListaCidades(lerEntrada(arq))
 print(lista_cidades)
