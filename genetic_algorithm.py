@@ -170,7 +170,7 @@ class AlgoritmoGenetico():
         self.melhor_solucao = self.populacao[0]
         self.lista_solucoes.append(self.melhor_solucao.distancia_percorrida)
         
-        self.visualiza_geracao()
+        #self.visualiza_geracao()
 
         self.geracao += 1
         
@@ -198,7 +198,7 @@ class AlgoritmoGenetico():
 
             self.populacao = self.populacao[:round(self.tamanho_populacao * 0.8)]
 
-            self.visualiza_geracao()
+            #self.visualiza_geracao()
 
             self.geracao += 1
             
