@@ -28,7 +28,7 @@ class Individuo():
         
         self.cromossomo = list(range(len(self.distancias)))
         rnd.shuffle(self.cromossomo)
-        
+                
         #Colocar o vértice inicial na posição 0
         for i in range(len(self.cromossomo)):
             if self.cromossomo[i] == self.indice_vertice_inicial:
@@ -53,24 +53,23 @@ class Individuo():
     #Algoritmo usado: Ordered Crossover
     def crossover(self, outro_individuo):
         corte = round(rnd.random() * len(self.cromossomo))
-        
-        parte1 = self.cromossomo[0:corte]
-        parte2 = []
+                
+        parte1 = self.cromossomo[:corte]
+        parte2 = outro_individuo.cromossomo
         
         #Adiciona o elemento à parte 2, caso ele não esteja presente na parte 1.
         #Isto é para impedir que haja repetição de vértices.
-        for e in outro_individuo.cromossomo:
-            if utils.char_search(e, parte1) == False:
-                parte2.append(e)
         
-        filho1 = parte1 + parte2
+        idx = sorted([parte2.index(i) for i in list(set(parte2) - set(parte1))])
+        parte2 = [parte2[i] for i in idx]
         
-        parte1 = outro_individuo.cromossomo[0:corte]
-        parte2 = []
+        filho1 = parte1[:corte] + parte2
         
-        for e in self.cromossomo:
-            if utils.char_search(e, parte1) == False:
-                parte2.append(e)
+        parte1 = outro_individuo.cromossomo[:corte]
+        parte2 = self.cromossomo
+        
+        idx = sorted([parte2.index(i) for i in list(set(parte2) - set(parte1))])
+        parte2 = [parte2[i] for i in idx]
         
         filho2 = parte1 + parte2
         
@@ -87,6 +86,8 @@ class Individuo():
     #Se ocorrer mutação, troca a posição de 2 genes
     def mutacao(self, taxa_mutacao):      
         #Não pode haver mutação no vértice inicial
+        
+        '''
         for i in range(1, len(self.cromossomo)):
             if rnd.random() < taxa_mutacao:
                 posicao = round(rnd.random() * (len(self.cromossomo) - 1))
@@ -98,6 +99,22 @@ class Individuo():
                 temp = self.cromossomo[posicao]
                 self.cromossomo[posicao] = self.cromossomo[i]
                 self.cromossomo[i] = temp
+        '''
+        
+        chance_mutacao = taxa_mutacao * len(self.cromossomo)
+        
+        if rnd.random() < chance_mutacao:
+            qtd_cromossomos_mutados = round(chance_mutacao)
+            
+            for i in range(qtd_cromossomos_mutados):
+                #-1 pra ignorar a primeira posicao e -1 já que começa de 0 e +1 para ignorar
+                #a posicao 0
+                posicao1 = round(rnd.random() * (len(self.cromossomo) - 2)) + 1
+                posicao2 = round(rnd.random() * (len(self.cromossomo) - 2)) + 1
+                
+            temp = self.cromossomo[posicao1]
+            self.cromossomo[posicao1] = self.cromossomo[posicao2]
+            self.cromossomo[posicao2] = temp
                 
         return self
     
@@ -150,7 +167,7 @@ class AlgoritmoGenetico():
             pai += 1
             i += 1
             
-        return pai
+        return pai   
     
     #Função apenas pra printar os resultados de cada geração.
     def visualiza_geracao(self):
@@ -182,12 +199,15 @@ class AlgoritmoGenetico():
                 pai1 = self.seleciona_pai(soma_avaliacao)
                 pai2 = self.seleciona_pai(soma_avaliacao)
                 
+                while pai1 == pai2:
+                    pai2 = self.seleciona_pai(soma_avaliacao)
+                    
                 filhos = self.populacao[pai1].crossover(self.populacao[pai2])
                 
                 nova_populacao.append(filhos[0].mutacao(taxa_mutacao))
                 nova_populacao.append(filhos[1].mutacao(taxa_mutacao))
 
-            individuos_mantidos = self.populacao[:round(self.tamanho_populacao * 0.2)]
+            individuos_mantidos = self.populacao[:round(self.tamanho_populacao * 0.20)]
                 
             self.populacao = list(nova_populacao) + individuos_mantidos
             
@@ -196,9 +216,10 @@ class AlgoritmoGenetico():
     
             self.ordena_populacao()
 
-            self.populacao = self.populacao[:round(self.tamanho_populacao * 0.8)]
+            self.populacao = self.populacao[:round(self.tamanho_populacao * 0.80)]
 
-            #self.visualiza_geracao()
+            if geracao % 100 == 0:    
+                self.visualiza_geracao()
 
             self.geracao += 1
             
@@ -224,6 +245,18 @@ if __name__ == '__main__':
     #argv[6]: num geracoes
     
     lista_cidades = []
+    
+    entrada = "a280.tsp"
+    vertice_inicial = (288, 149)
+    tamanho_populacao = 200
+    taxa_mutacao = 0.01
+    numero_geracoes = 300
+    
+    lista_cidades = getListaCidades(lerEntrada(entrada))
+
+    distancias = matrix.calc_distances(lista_cidades)
+    
+    '''
     lista_cidades = getListaCidades(lerEntrada(sys.argv[1]))
 
     distancias = matrix.calc_distances(lista_cidades)
@@ -234,6 +267,9 @@ if __name__ == '__main__':
     vertice_inicial = (float(sys.argv[2]), float(sys.argv[3]))
 
     print("x: %s  y: %s" % (sys.argv[2], sys.argv[3]))
+    '''
+    
+    
     print(lista_cidades[0].x, lista_cidades[0].y)
     
     indice_vertice_inicial = utils.search_vertex_index(vertice_inicial, lista_cidades)
