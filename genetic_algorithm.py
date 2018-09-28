@@ -25,9 +25,7 @@ class Individuo():
         self.distancia_percorrida = 0
         self.nota_avaliacao = 0
         self.indice_vertice_inicial = indice_vertice_inicial
-        
-        self.cromossomo = list(range(len(self.distancias)))
-        rnd.shuffle(self.cromossomo)
+        self.cromossomo = []
                 
         #Colocar o vértice inicial na posição 0
         for i in range(len(self.cromossomo)):
@@ -133,6 +131,8 @@ class AlgoritmoGenetico():
     def inicializa_populacao(self, distancias, indice_vertice_inicial):
         for i in range(self.tamanho_populacao):
             self.populacao.append(Individuo(distancias, indice_vertice_inicial))
+            self.populacao[i].cromossomo = list(range(len(distancias)))
+            rnd.shuffle(self.populacao[i].cromossomo)
             
         self.melhor_solucao = self.populacao[0]
         
