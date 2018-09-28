@@ -27,15 +27,6 @@ class Individuo():
         self.indice_vertice_inicial = indice_vertice_inicial
         self.cromossomo = []
                 
-        #Colocar o vértice inicial na posição 0
-        for i in range(len(self.cromossomo)):
-            if self.cromossomo[i] == self.indice_vertice_inicial:
-                temp = self.cromossomo[0]
-                self.cromossomo[0] = self.indice_vertice_inicial
-                self.cromossomo[i] = temp
-                
-                break
-                
     #Função que vai atribuir uma nota pra solução gerada.
     def avaliacao(self):
         soma_distancias = 0
@@ -83,26 +74,11 @@ class Individuo():
     #gerado aleatóriamente for maior que a taxa de mutação.
     #Se ocorrer mutação, troca a posição de 2 genes
     def mutacao(self, taxa_mutacao):      
-        #Não pode haver mutação no vértice inicial
-        
-        '''
-        for i in range(1, len(self.cromossomo)):
-            if rnd.random() < taxa_mutacao:
-                posicao = round(rnd.random() * (len(self.cromossomo) - 1))
-                
-                #Para não permitir que o vertice inicial seja permutado
-                while posicao == 0:
-                    posicao = round(rnd.random() * (len(self.cromossomo) - 1))
-                
-                temp = self.cromossomo[posicao]
-                self.cromossomo[posicao] = self.cromossomo[i]
-                self.cromossomo[i] = temp
-        '''
-        
+        #Não pode haver mutação no vértice inicial       
         chance_mutacao = taxa_mutacao * len(self.cromossomo) * rnd.random()
         
         if rnd.random() < chance_mutacao:
-            qtd_cromossomos_mutados = taxa_mutacao * len(self.cromossomo)
+            qtd_cromossomos_mutados = round(taxa_mutacao * len(self.cromossomo))
             
             for i in range(qtd_cromossomos_mutados):
                 #-1 pra ignorar a primeira posicao e -1 já que começa de 0 e +1 para ignorar
@@ -125,6 +101,7 @@ class AlgoritmoGenetico():
         self.populacao = []
         self.geracao = 0
         self.melhor_solucao = 0
+        self.soma_avaliacao = 0
         self.lista_solucoes = []
         
     #Temos que adaptar os parâmetros recebidos para os usados em nosso problema.
@@ -133,6 +110,15 @@ class AlgoritmoGenetico():
             self.populacao.append(Individuo(distancias, indice_vertice_inicial))
             self.populacao[i].cromossomo = list(range(len(distancias)))
             rnd.shuffle(self.populacao[i].cromossomo)
+            
+            #Colocar o vértice inicial na posição 0
+            for j in range(len(self.populacao[i].cromossomo)):
+                if self.populacao[i].cromossomo[j] == indice_vertice_inicial:
+                    temp = self.populacao[i].cromossomo[0]
+                    self.populacao[i].cromossomo[0] = indice_vertice_inicial
+                    self.populacao[i].cromossomo[j] = temp
+                    
+                    break
             
         self.melhor_solucao = self.populacao[0]
         
@@ -171,9 +157,9 @@ class AlgoritmoGenetico():
     
     #Função apenas pra printar os resultados de cada geração.
     def visualiza_geracao(self):
-        melhor = self.populacao[0]
-        print("G:%s -> Distancia: %s" % (self.geracao,
-                                                               melhor.distancia_percorrida))
+        print("\nGeracao atual: %s | Melhor solução -> G:%s -> Distancia: %s" % (self.geracao, 
+                                                               self.melhor_solucao.geracao,
+                                                               self.melhor_solucao.distancia_percorrida))
         
     #Gerencia o funcionamento do algoritmo genético.
     def resolver(self, taxa_mutacao, numero_geracoes, distancias, indice_vertice_inicial):
@@ -181,6 +167,7 @@ class AlgoritmoGenetico():
         
         for individuo in self.populacao:
             individuo.avaliacao()
+            self.soma_avaliacao += individuo.nota_avaliacao
         
         self.ordena_populacao()
         
@@ -192,31 +179,35 @@ class AlgoritmoGenetico():
         self.geracao += 1
         
         for geracao in range(numero_geracoes):
-            soma_avaliacao = self.soma_avaliacoes()
+            #soma_avaliacao = self.soma_avaliacoes()
             nova_populacao = []
             
             for individuos_gerados in range(0, self.tamanho_populacao, 2):
-                pai1 = self.seleciona_pai(soma_avaliacao)
-                pai2 = self.seleciona_pai(soma_avaliacao)
+                pai1 = self.seleciona_pai(self.soma_avaliacao)
+                pai2 = self.seleciona_pai(self.soma_avaliacao)
                 
                 while pai1 == pai2:
-                    pai2 = self.seleciona_pai(soma_avaliacao)
+                    pai2 = self.seleciona_pai(self.soma_avaliacao)
                     
                 filhos = self.populacao[pai1].crossover(self.populacao[pai2])
                 
                 nova_populacao.append(filhos[0].mutacao(taxa_mutacao))
                 nova_populacao.append(filhos[1].mutacao(taxa_mutacao))
 
-            individuos_mantidos = self.populacao[:round(self.tamanho_populacao * 0.20)]
+            individuos_mantidos = self.populacao[:round(self.tamanho_populacao * 0.10)]
                 
             self.populacao = list(nova_populacao) + individuos_mantidos
             
+            #print("Soma avaliacao: %s" % self.soma_avaliacao)
+            self.soma_avaliacao = 0
+            
             for individuo in self.populacao:
                 individuo.avaliacao()
+                self.soma_avaliacao += individuo.nota_avaliacao
     
             self.ordena_populacao()
 
-            self.populacao = self.populacao[:round(self.tamanho_populacao * 0.80)]
+            self.populacao = self.populacao[:round(self.tamanho_populacao * 0.90)]
 
             if geracao % 100 == 0:    
                 self.visualiza_geracao()
@@ -227,8 +218,7 @@ class AlgoritmoGenetico():
             self.lista_solucoes.append(melhor.distancia_percorrida)
             self.melhor_individuo(melhor)
             
-        print("\nMelhor solução -> G:%s -> Distancia: %s" % (self.melhor_solucao.geracao,
-                                                               self.melhor_solucao.distancia_percorrida))
+        self.visualiza_geracao()
         print("Cromossomo: %s" % self.melhor_solucao.cromossomo)
         
         return (self.melhor_solucao.cromossomo,self.melhor_solucao.distancia_percorrida)
