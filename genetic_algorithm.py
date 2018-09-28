@@ -99,10 +99,10 @@ class Individuo():
                 self.cromossomo[i] = temp
         '''
         
-        chance_mutacao = taxa_mutacao * len(self.cromossomo)
+        chance_mutacao = taxa_mutacao * len(self.cromossomo) * rnd.random()
         
         if rnd.random() < chance_mutacao:
-            qtd_cromossomos_mutados = round(chance_mutacao)
+            qtd_cromossomos_mutados = taxa_mutacao * len(self.cromossomo)
             
             for i in range(qtd_cromossomos_mutados):
                 #-1 pra ignorar a primeira posicao e -1 já que começa de 0 e +1 para ignorar
@@ -110,9 +110,9 @@ class Individuo():
                 posicao1 = round(rnd.random() * (len(self.cromossomo) - 2)) + 1
                 posicao2 = round(rnd.random() * (len(self.cromossomo) - 2)) + 1
                 
-            temp = self.cromossomo[posicao1]
-            self.cromossomo[posicao1] = self.cromossomo[posicao2]
-            self.cromossomo[posicao2] = temp
+                temp = self.cromossomo[posicao1]
+                self.cromossomo[posicao1] = self.cromossomo[posicao2]
+                self.cromossomo[posicao2] = temp
                 
         return self
     
