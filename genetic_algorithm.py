@@ -209,7 +209,7 @@ class AlgoritmoGenetico():
                 
             self.ordena_populacao()
 
-            self.populacao = self.populacao[:self.tamanho_populacao * 0.90]
+            self.populacao = self.populacao[:self.tamanho_populacao]
 
             if geracao % 100 == 0:    
                 self.visualiza_geracao()
