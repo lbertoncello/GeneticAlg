@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as numpy
 import sys as sys
 
+import time as time
+
 from cidade import *
 from leitura import *
 from Utils import matrix as matrix
@@ -19,7 +21,7 @@ class Produto():
 #Neste problema nós procuramos os produtos a serem levados em um caminhão de
 #espaço limitado de forma a maximizar o lucro.
 class Individuo():
-    def __init__(self, distancias, indice_vertice_inicial, geracao = 0):
+    def __init__(self, distancias, indice_vertice_inicial, geracao = 1):
         self.distancias = distancias
         self.geracao = geracao
         self.distancia_percorrida = 0
@@ -40,7 +42,7 @@ class Individuo():
         self.nota_avaliacao = 1 / soma_distancias
         
     #Algoritmo usado: Ordered Crossover
-    def crossover(self, outro_individuo):
+    def crossover(self, outro_individuo, geracao):
         corte = round(rnd.random() * len(self.cromossomo))
                 
         parte1 = self.cromossomo[:corte]
@@ -53,7 +55,7 @@ class Individuo():
         parte2 = [parte2[i] for i in idx]
         
         filho1 = parte1[:corte] + parte2
-        
+                
         parte1 = outro_individuo.cromossomo[:corte]
         parte2 = self.cromossomo
         
@@ -62,8 +64,8 @@ class Individuo():
         
         filho2 = parte1 + parte2
         
-        filhos = [Individuo(self.distancias, self.indice_vertice_inicial, self.geracao + 1),
-                  Individuo(self.distancias, self.indice_vertice_inicial, self.geracao + 1)]
+        filhos = [Individuo(self.distancias, self.indice_vertice_inicial, geracao + 1),
+                  Individuo(self.distancias, self.indice_vertice_inicial, geracao + 1)]
         
         filhos[0].cromossomo = filho1
         filhos[1].cromossomo = filho2
@@ -181,19 +183,19 @@ class AlgoritmoGenetico():
         for geracao in range(numero_geracoes):
             #soma_avaliacao = self.soma_avaliacoes()
             nova_populacao = []
-            
-            for individuos_gerados in range(0, self.tamanho_populacao, 2):
+             
+            for individuos_gerados in range(0, self.tamanho_populacao, 2):                 
                 pai1 = self.seleciona_pai(self.soma_avaliacao)
                 pai2 = self.seleciona_pai(self.soma_avaliacao)
                 
                 while pai1 == pai2:
-                    pai2 = self.seleciona_pai(self.soma_avaliacao)
-                    
-                filhos = self.populacao[pai1].crossover(self.populacao[pai2])
+                    pai2 = self.seleciona_pai(self.soma_avaliacao)                    
                 
+                filhos = self.populacao[pai1].crossover(self.populacao[pai2], self.geracao)
+                                
                 nova_populacao.append(filhos[0].mutacao(taxa_mutacao))
                 nova_populacao.append(filhos[1].mutacao(taxa_mutacao))
-
+                
             individuos_mantidos = self.populacao[:round(self.tamanho_populacao * 0.10)]
                 
             self.populacao = list(nova_populacao) + individuos_mantidos
@@ -204,7 +206,7 @@ class AlgoritmoGenetico():
             for individuo in self.populacao:
                 individuo.avaliacao()
                 self.soma_avaliacao += individuo.nota_avaliacao
-    
+                
             self.ordena_populacao()
 
             self.populacao = self.populacao[:round(self.tamanho_populacao * 0.90)]
@@ -217,6 +219,8 @@ class AlgoritmoGenetico():
             melhor = self.populacao[0]
             self.lista_solucoes.append(melhor.distancia_percorrida)
             self.melhor_individuo(melhor)
+            
+            #print("Proximo ciclo")
             
         self.visualiza_geracao()
         print("Cromossomo: %s" % self.melhor_solucao.cromossomo)
@@ -238,9 +242,9 @@ if __name__ == '__main__':
     
     entrada = "a280.tsp"
     vertice_inicial = (288, 149)
-    tamanho_populacao = 200
-    taxa_mutacao = 0.01
-    numero_geracoes = 300
+    tamanho_populacao = 20
+    taxa_mutacao = 0.025
+    numero_geracoes = 100
     
     lista_cidades = getListaCidades(lerEntrada(entrada))
 
